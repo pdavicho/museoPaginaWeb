@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RumiArt IA - Museo Rumiñahui</title>
+    
+    <!-- React y Babel -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        #root {
+            min-height: 100vh;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-30px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Datos de las salas del museo
+        const museumRooms = [
+            {
+                id: 1,
+                name: 'Sala 1 - Primeros Pobladores',
+                icon: '🏺',
+                color: '#00D9FF',
+                objects: [
+                    { 
+                        name: 'Olla Globular', 
+                        description: 'Olla de barro precolombina de procedencia Cosanga.',
+                        image: 'images/sala1/sala1_olla_globular.jpg'
+                    },
+                    { 
+                        name: 'Plato Pentápodo', 
+                        description: 'Recipiente ceremonial de cinco patas.',
+                        image: 'images/sala1/sala1_plato_pentapodo.jpg'
+                    },
+                    { 
+                        name: 'Plato Trípode', 
+                        description: 'Recipiente ceremonial de tres patas.',
+                        image: 'images/sala1/sala1_plato_tripode1.jpg'
+                    },
+                    { 
+                        name: 'Plato Trípode (variante)', 
+                        description: 'Segunda variante con decoraciones.',
+                        image: 'images/sala1/sala1_plato_tripode2.jpg'
+                    }
+                ]
+            },
+            {
+                id: 2,
+                name: 'Sala 2 - La Colonia',
+                icon: '⛪',
+                color: '#FF8C42',
+                objects: [
+                    { 
+                        name: 'Crucifijo', 
+                        description: 'Cruz cristiana tallada en madera.',
+                        image: 'images/sala2/sala2_crucifijo.jpg'
+                    },
+                    { 
+                        name: 'Hacienda Chillo Compañía', 
+                        description: 'Haciendas jesuitas del siglo XVII.',
+                        image: 'images/sala2/sala2_hacienda_chillo.jpg'
+                    },
+                    { 
+                        name: 'Cacique Juan Zangolquí', 
+                        description: 'El Cacique de Urin Chillo.',
+                        image: 'images/sala2/sala2_cacique_zangolqui.jpg'
+                    },
+                    { 
+                        name: 'Volcán Cotopaxi', 
+                        description: 'Segundo volcán más alto de Ecuador.',
+                        image: 'images/sala2/sala2_volcan_cotopaxi.jpg'
+                    }
+                ]
+            },
+            {
+                id: 3,
+                name: 'Sala 3 - La Independencia',
+                icon: '🎖️',
+                color: '#FF6B9D',
+                objects: [
+                    { 
+                        name: 'Juan de Salinas', 
+                        description: 'Prócer libertario sangolquileño.',
+                        image: 'images/sala3/sala3_juan_salinas.jpg'
+                    },
+                    { 
+                        name: 'Juan Pío Montúfar', 
+                        description: 'Marqués de Selva Alegre.',
+                        image: 'images/sala3/sala3_juan_montufar.jpg'
+                    },
+                    { 
+                        name: 'Rosa Montúfar', 
+                        description: 'Símbolo femenino de la Independencia.',
+                        image: 'images/sala3/sala3_rosa_montufar.jpg'
+                    },
+                    { 
+                        name: 'Lucas Tipán', 
+                        description: 'El Chasqui Libertador.',
+                        image: 'images/sala3/sala3_lucas_tipan.jpg'
+                    }
+                ]
+            },
+            {
+                id: 4,
+                name: 'Sala 4 - El Maíz',
+                icon: '🌽',
+                color: '#00D9FF',
+                objects: [
+                    { 
+                        name: 'Planos del Maíz', 
+                        description: 'Planos del monumento "El Choclo".',
+                        image: 'images/sala4/sala4_planos_maiz.jpg'
+                    }
+                ]
+            },
+            {
+                id: 5,
+                name: 'Sala 5 - Plástica Ecuatoriana',
+                icon: '🎨',
+                color: '#FF8C42',
+                objects: [
+                    { 
+                        name: 'El Caballo Azul', 
+                        description: 'Obra de Gonzalo Endara Crow.',
+                        image: 'images/sala5/sala5_caballo_azul.jpg'
+                    },
+                    { 
+                        name: 'Retrato de Juan de Salinas', 
+                        description: 'Prócer de la Independencia.',
+                        image: 'images/sala5/sala5_retrato_salinas.jpg'
+                    },
+                    { 
+                        name: 'La Rendición', 
+                        description: 'Obra de Eduardo Kingman.',
+                        image: 'images/sala5/sala5_la_rendicion.jpg'
+                    },
+                    { 
+                        name: 'Retrato de Simón Bolívar', 
+                        description: 'Obra de Oswaldo Guayasamín.',
+                        image: 'images/sala5/sala5_simon_bolivar.jpg'
+                    }
+                ]
+            },
+            {
+                id: 6,
+                name: 'Sala 6 - La Cantonización',
+                icon: '🎭',
+                color: '#FF6B9D',
+                objects: [
+                    { 
+                        name: 'Chagra', 
+                        description: 'Figura del campesino andino.',
+                        image: 'images/sala6/sala6_chagra.jpg'
+                    },
+                    { 
+                        name: 'Pingullero', 
+                        description: 'Músico tradicional.',
+                        image: 'images/sala6/sala6_pingullero.jpg'
+                    },
+                    { 
+                        name: 'Ruco', 
+                        description: 'Símbolo de sabiduría ancestral.',
+                        image: 'images/sala6/sala6_ruco.jpg'
+                    }
+                ]
+            }
+        ];
+
+        // Componente de Navegación
+        const Navigation = () => {
+            const [scrolled, setScrolled] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => {
+                    setScrolled(window.scrollY > 50);
+                };
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const scrollToSection = (sectionId) => {
+                const element = document.getElementById(sectionId);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            };
+
+            return (
+                <nav style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    background: scrolled ? 'rgba(26, 11, 46, 0.95)' : 'transparent',
+                    backdropFilter: scrolled ? 'blur(10px)' : 'none',
+                    padding: '1rem 2rem',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    zIndex: 1000,
+                    transition: 'all 0.3s ease',
+                    boxShadow: scrolled ? '0 4px 20px rgba(0, 0, 0, 0.3)' : 'none'
+                }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        cursor: 'pointer'
+                    }} onClick={() => scrollToSection('inicio')}>
+                        <img 
+                            src="images/logoRumiArtIA.png" 
+                            alt="RumiArt IA Logo"
+                            style={{
+                                width: '50px',
+                                height: '50px',
+                                borderRadius: '50%'
+                            }}
+                        />
+                        <span style={{
+                            fontSize: '1.5rem',
+                            fontWeight: 'bold',
+                            background: 'linear-gradient(135deg, #00D9FF 0%, #FF8C42 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent'
+                        }}>
+                            RumiArt IA
+                        </span>
+                    </div>
+                    
+                    <div style={{
+                        display: 'flex',
+                        gap: '2rem',
+                        alignItems: 'center'
+                    }}>
+                        {[
+                            { id: 'inicio', label: 'Inicio' },
+                            { id: 'descargar', label: 'Descargar' },
+                            { id: 'salas', label: 'Salas' },
+                            { id: 'instalacion', label: 'Instalación' },
+                            { id: 'encuesta', label: 'Encuesta' }
+                        ].map(item => (
+                            <button
+                                key={item.id}
+                                onClick={() => scrollToSection(item.id)}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#ffffff',
+                                    fontSize: '1rem',
+                                    cursor: 'pointer',
+                                    transition: 'color 0.3s ease',
+                                    fontFamily: 'inherit'
+                                }}
+                                onMouseEnter={(e) => e.target.style.color = '#00D9FF'}
+                                onMouseLeave={(e) => e.target.style.color = '#ffffff'}
+                            >
+                                {item.label}
+                            </button>
+                        ))}
+                    </div>
+                </nav>
+            );
+        };
+
+        // Componente Principal de la App
+        const App = () => {
+            const [expandedRoom, setExpandedRoom] = useState(null);
+
+            const toggleRoom = (roomId) => {
+                setExpandedRoom(expandedRoom === roomId ? null : roomId);
+            };
+
+            return (
+                <div>
+                    <Navigation />
+                    
+                    {/* Hero Section */}
+                    <section id="inicio" style={{
+                        minHeight: '100vh',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: '2rem',
+                        textAlign: 'center'
+                    }}>
+                        <div style={{ maxWidth: '900px' }}>
+                            <img 
+                                src="images/logoRumiArtIA.png" 
+                                alt="RumiArt IA Logo"
+                                style={{
+                                    width: '200px',
+                                    height: '200px',
+                                    marginBottom: '2rem',
+                                    borderRadius: '50%',
+                                    boxShadow: '0 10px 40px rgba(0, 217, 255, 0.4)'
+                                }}
+                            />
+                            <h1 style={{
+                                fontSize: '4rem',
+                                marginBottom: '1rem',
+                                background: 'linear-gradient(135deg, #00D9FF 0%, #FF8C42 100%)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent'
+                            }}>
+                                RumiArt IA
+                            </h1>
+                            <p style={{ fontSize: '1.5rem', color: '#00D9FF', marginBottom: '2rem' }}>
+                                Reconocimiento de Objetos con Inteligencia Artificial
+                            </p>
+                            <p style={{ fontSize: '1.2rem', color: 'rgba(255, 255, 255, 0.8)', marginBottom: '3rem' }}>
+                                Explora el Museo Rumiñahui de forma innovadora con tecnología ML.
+                            </p>
+                            <button
+                                onClick={() => document.getElementById('descargar').scrollIntoView({ behavior: 'smooth' })}
+                                style={{
+                                    background: 'linear-gradient(135deg, #00D9FF 0%, #0099CC 100%)',
+                                    color: '#1a0b2e',
+                                    padding: '1rem 2.5rem',
+                                    borderRadius: '50px',
+                                    border: 'none',
+                                    fontSize: '1.2rem',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 10px 30px rgba(0, 217, 255, 0.4)'
+                                }}
+                            >
+                                📱 Descargar App
+                            </button>
+                        </div>
+                    </section>
+                    
+                    {/* Sección de Descarga */}
+                    <section id="descargar" style={{
+                        minHeight: '100vh',
+                        padding: '6rem 2rem',
+                        background: 'linear-gradient(180deg, #1a0b2e 0%, #2d1b4e 50%, #1a0b2e 100%)'
+                    }}>
+                        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                            <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                                <h2 style={{
+                                    fontSize: '3rem',
+                                    fontWeight: 'bold',
+                                    marginBottom: '1rem',
+                                    background: 'linear-gradient(135deg, #00D9FF 0%, #FF8C42 100%)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent'
+                                }}>
+                                    📱 Descarga RumiArt IA
+                                </h2>
+                                <p style={{ fontSize: '1.2rem', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                    Instala la aplicación en tu dispositivo Android
+                                </p>
+                            </div>
+
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                                gap: '3rem'
+                            }}>
+                                {/* Card de descarga */}
+                                <div style={{
+                                    background: 'rgba(255, 255, 255, 0.05)',
+                                    borderRadius: '20px',
+                                    padding: '3rem',
+                                    border: '2px solid rgba(0, 217, 255, 0.3)',
+                                    textAlign: 'center'
+                                }}>
+                                    <div style={{ fontSize: '5rem', marginBottom: '1.5rem' }}>📲</div>
+                                    <h3 style={{ fontSize: '2rem', color: '#00D9FF', marginBottom: '1rem' }}>
+                                        RumiArt IA v1.0
+                                    </h3>
+                                    <div style={{
+                                        background: 'rgba(0, 217, 255, 0.1)',
+                                        padding: '1rem',
+                                        borderRadius: '10px',
+                                        marginBottom: '2rem'
+                                    }}>
+                                        <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>
+                                            <strong style={{ color: '#00D9FF' }}>Tamaño:</strong> ~15 MB
+                                        </p>
+                                        <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>
+                                            <strong style={{ color: '#00D9FF' }}>Versión:</strong> 1.0.0
+                                        </p>
+                                        <p style={{ fontSize: '0.9rem' }}>
+                                            <strong style={{ color: '#00D9FF' }}>Actualización:</strong> Dic 2025
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => window.open('https://drive.google.com/file/d/1EyyGVVWQBliseswqJS1Jmw6UVpjTjfoM/view?usp=sharing', '_blank')}
+                                        style={{
+                                            width: '100%',
+                                            background: 'linear-gradient(135deg, #00D9FF 0%, #0099CC 100%)',
+                                            color: '#1a0b2e',
+                                            padding: '1.2rem 2rem',
+                                            borderRadius: '15px',
+                                            border: 'none',
+                                            fontSize: '1.3rem',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 10px 30px rgba(0, 217, 255, 0.4)'
+                                        }}
+                                    >
+                                        ⬇️ Descargar APK
+                                    </button>
+                                </div>
+
+                                {/* Compatibilidad y requisitos */}
+                                <div>
+                                    <div style={{
+                                        background: 'rgba(255, 140, 66, 0.1)',
+                                        borderRadius: '20px',
+                                        padding: '2rem',
+                                        border: '2px solid rgba(255, 140, 66, 0.3)',
+                                        marginBottom: '2rem'
+                                    }}>
+                                        <h3 style={{ fontSize: '1.5rem', color: '#FF8C42', marginBottom: '1.5rem' }}>
+                                            🤖 Compatibilidad
+                                        </h3>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                                            <div style={{
+                                                background: 'rgba(76, 175, 80, 0.2)',
+                                                padding: '0.5rem',
+                                                borderRadius: '10px',
+                                                fontSize: '1.5rem'
+                                            }}>✅</div>
+                                            <div>
+                                                <p style={{ fontWeight: 'bold', color: '#4CAF50' }}>Android</p>
+                                                <p style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                                    Versión 7.0 (API 24) o superior
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                            <div style={{
+                                                background: 'rgba(244, 67, 54, 0.2)',
+                                                padding: '0.5rem',
+                                                borderRadius: '10px',
+                                                fontSize: '1.5rem'
+                                            }}>❌</div>
+                                            <div>
+                                                <p style={{ fontWeight: 'bold', color: '#F44336' }}>iOS</p>
+                                                <p style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                                    No disponible
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style={{
+                                        background: 'rgba(255, 255, 255, 0.05)',
+                                        borderRadius: '20px',
+                                        padding: '2rem',
+                                        border: '1px solid rgba(0, 217, 255, 0.2)'
+                                    }}>
+                                        <h3 style={{ fontSize: '1.5rem', color: '#00D9FF', marginBottom: '1.5rem' }}>
+                                            ⚙️ Requisitos
+                                        </h3>
+                                        {[
+                                            { icon: '📱', text: 'Android 7.0+' },
+                                            { icon: '💾', text: '50 MB espacio' },
+                                            { icon: '📷', text: 'Permisos de cámara' },
+                                            { icon: '🔊', text: 'Audio (opcional)' },
+                                            { icon: '🌐', text: 'Sin internet' }
+                                        ].map((req, idx) => (
+                                            <div key={idx} style={{
+                                                padding: '0.8rem 0',
+                                                borderBottom: idx < 4 ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '1rem'
+                                            }}>
+                                                <span style={{ fontSize: '1.3rem' }}>{req.icon}</span>
+                                                <span>{req.text}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{
+                                marginTop: '3rem',
+                                padding: '2rem',
+                                background: 'rgba(255, 140, 66, 0.1)',
+                                borderRadius: '15px',
+                                border: '2px solid rgba(255, 140, 66, 0.3)',
+                                textAlign: 'center'
+                            }}>
+                                <p style={{ fontSize: '1.1rem', color: '#FF8C42', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                                    ⚠️ Nota Importante
+                                </p>
+                                <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.95rem' }}>
+                                    Solo disponible para Android. Habilita la instalación de fuentes desconocidas.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                    {/* Sección de Salas */}
+                    <section id="salas" style={{
+                        minHeight: '100vh',
+                        padding: '6rem 2rem',
+                        background: 'rgba(0, 0, 0, 0.2)'
+                    }}>
+                        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+                            <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                                <h2 style={{
+                                    fontSize: '3rem',
+                                    fontWeight: 'bold',
+                                    marginBottom: '1rem',
+                                    background: 'linear-gradient(135deg, #FF8C42 0%, #FF6B9D 100%)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent'
+                                }}>
+                                    🏛️ Salas del Museo
+                                </h2>
+                                <p style={{ fontSize: '1.2rem', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                    Explora las 6 salas del Museo Rumiñahui con 19 objetos reconocibles
+                                </p>
+                            </div>
+
+                            {/* Contadores */}
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                gap: '2rem',
+                                marginBottom: '4rem',
+                                flexWrap: 'wrap'
+                            }}>
+                                <div style={{
+                                    background: 'rgba(0, 217, 255, 0.1)',
+                                    padding: '1.5rem 3rem',
+                                    borderRadius: '15px',
+                                    border: '2px solid rgba(0, 217, 255, 0.3)',
+                                    textAlign: 'center'
+                                }}>
+                                    <div style={{ fontSize: '3rem', fontWeight: 'bold', color: '#00D9FF' }}>6</div>
+                                    <div style={{ fontSize: '1rem' }}>Salas del Museo</div>
+                                </div>
+                                <div style={{
+                                    background: 'rgba(255, 140, 66, 0.1)',
+                                    padding: '1.5rem 3rem',
+                                    borderRadius: '15px',
+                                    border: '2px solid rgba(255, 140, 66, 0.3)',
+                                    textAlign: 'center'
+                                }}>
+                                    <div style={{ fontSize: '3rem', fontWeight: 'bold', color: '#FF8C42' }}>19</div>
+                                    <div style={{ fontSize: '1rem' }}>Objetos Reconocibles</div>
+                                </div>
+                            </div>
+
+                            {/* Grid de salas */}
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+                                gap: '2rem'
+                            }}>
+                                {museumRooms.map((room) => (
+                                    <div 
+                                        key={room.id} 
+                                        style={{
+                                            background: 'rgba(255, 255, 255, 0.05)',
+                                            borderRadius: '20px',
+                                            padding: '2rem',
+                                            border: `2px solid ${room.color}40`,
+                                            transition: 'all 0.3s ease',
+                                            cursor: 'pointer'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(-5px)';
+                                            e.currentTarget.style.borderColor = room.color;
+                                            e.currentTarget.style.boxShadow = `0 10px 30px ${room.color}40`;
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.borderColor = `${room.color}40`;
+                                            e.currentTarget.style.boxShadow = 'none';
+                                        }}
+                                        onClick={() => toggleRoom(room.id)}
+                                    >
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '1rem',
+                                            marginBottom: '1.5rem'
+                                        }}>
+                                            <div style={{ fontSize: '3rem' }}>{room.icon}</div>
+                                            <div style={{ flex: 1 }}>
+                                                <h3 style={{
+                                                    fontSize: '1.3rem',
+                                                    color: room.color,
+                                                    fontWeight: 'bold',
+                                                    marginBottom: '0.3rem'
+                                                }}>
+                                                    {room.name}
+                                                </h3>
+                                                <p style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+                                                    {room.objects.length} objetos reconocibles
+                                                </p>
+                                            </div>
+                                            <div style={{
+                                                fontSize: '1.5rem',
+                                                color: room.color,
+                                                transform: expandedRoom === room.id ? 'rotate(180deg)' : 'rotate(0)',
+                                                transition: 'transform 0.3s ease'
+                                            }}>
+                                                ▼
+                                            </div>
+                                        </div>
+
+                                        {expandedRoom !== room.id && (
+                                            <div style={{
+                                                textAlign: 'center',
+                                                padding: '1rem',
+                                                color: room.color,
+                                                fontSize: '0.9rem',
+                                                fontWeight: 'bold'
+                                            }}>
+                                                Click para ver objetos →
+                                            </div>
+                                        )}
+
+                                        <div style={{
+                                            maxHeight: expandedRoom === room.id ? '2000px' : '0',
+                                            overflow: 'hidden',
+                                            transition: 'max-height 0.5s ease'
+                                        }}>
+                                            <div style={{
+                                                borderTop: `1px solid ${room.color}40`,
+                                                paddingTop: '1rem'
+                                            }}>
+                                                {room.objects.map((obj, idx) => (
+                                                    <div key={idx} style={{
+                                                        padding: '1rem',
+                                                        marginBottom: '0.8rem',
+                                                        background: 'rgba(255, 255, 255, 0.03)',
+                                                        borderRadius: '10px',
+                                                        border: `1px solid ${room.color}20`
+                                                    }}>
+                                                        {/* Imagen del objeto */}
+                                                        {obj.image && (
+                                                            <div style={{
+                                                                width: '100%',
+                                                                height: '250px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                background: 'rgba(0, 0, 0, 0.3)',
+                                                                borderRadius: '8px',
+                                                                marginBottom: '1rem',
+                                                                padding: '0.5rem',
+                                                                overflow: 'hidden'
+                                                            }}>
+                                                                <img 
+                                                                    src={obj.image} 
+                                                                    alt={obj.name}
+                                                                    style={{
+                                                                        maxWidth: '100%',
+                                                                        maxHeight: '100%',
+                                                                        width: 'auto',
+                                                                        height: 'auto',
+                                                                        objectFit: 'contain',
+                                                                        borderRadius: '5px'
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        )}
+                                                        <div style={{ display: 'flex', gap: '0.8rem' }}>
+                                                            <div style={{
+                                                                background: `${room.color}30`,
+                                                                padding: '0.5rem',
+                                                                borderRadius: '8px',
+                                                                fontSize: '1.2rem',
+                                                                minWidth: '40px',
+                                                                textAlign: 'center'
+                                                            }}>
+                                                                📸
+                                                            </div>
+                                                            <div style={{ flex: 1 }}>
+                                                                <p style={{
+                                                                    fontWeight: 'bold',
+                                                                    color: room.color,
+                                                                    marginBottom: '0.3rem',
+                                                                    fontSize: '1rem'
+                                                                }}>
+                                                                    {obj.name}
+                                                                </p>
+                                                                <p style={{
+                                                                    fontSize: '0.85rem',
+                                                                    color: 'rgba(255, 255, 255, 0.7)',
+                                                                    lineHeight: '1.4'
+                                                                }}>
+                                                                    {obj.description}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Instrucciones */}
+                            <div style={{
+                                marginTop: '3rem',
+                                background: 'rgba(0, 217, 255, 0.1)',
+                                borderRadius: '20px',
+                                padding: '2.5rem',
+                                border: '2px solid rgba(0, 217, 255, 0.3)',
+                                textAlign: 'center'
+                            }}>
+                                <h3 style={{ fontSize: '1.8rem', color: '#00D9FF', marginBottom: '1.5rem' }}>
+                                    📸 ¿Cómo usar la app?
+                                </h3>
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                                    gap: '2rem',
+                                    marginTop: '2rem'
+                                }}>
+                                    {[
+                                        { step: '1', icon: '📱', text: 'Abre la aplicación' },
+                                        { step: '2', icon: '📸', text: 'Fotografía el objeto' },
+                                        { step: '3', icon: '🤖', text: 'La IA lo reconoce' },
+                                        { step: '4', icon: '📖', text: 'Lee o reproduce su historia' }
+                                    ].map((item) => (
+                                        <div key={item.step} style={{ textAlign: 'center' }}>
+                                            <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>
+                                                {item.icon}
+                                            </div>
+                                            <div style={{
+                                                fontSize: '2rem',
+                                                fontWeight: 'bold',
+                                                color: '#00D9FF',
+                                                marginBottom: '0.5rem'
+                                            }}>
+                                                {item.step}
+                                            </div>
+                                            <div style={{ fontSize: '1rem' }}>{item.text}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    {/* Guía de Instalación */}
+                    <section id="instalacion" style={{
+                        minHeight: '100vh',
+                        padding: '6rem 2rem',
+                        background: 'linear-gradient(180deg, #1a0b2e 0%, #2d1b4e 50%, #1a0b2e 100%)'
+                    }}>
+                        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                            <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                                <h2 style={{
+                                    fontSize: '3rem',
+                                    fontWeight: 'bold',
+                                    marginBottom: '1rem',
+                                    background: 'linear-gradient(135deg, #00D9FF 0%, #FF8C42 100%)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent'
+                                }}>
+                                    📱 Guía de Instalación
+                                </h2>
+                                <p style={{ fontSize: '1.2rem', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                    Sigue estos pasos para instalar RumiArt IA en Android
+                                </p>
+                            </div>
+
+                            {/* Pasos de instalación */}
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                                gap: '2rem',
+                                marginBottom: '3rem'
+                            }}>
+                                {[
+                                    {
+                                        step: '1',
+                                        icon: '⬇️',
+                                        title: 'Descarga el APK',
+                                        description: 'Haz clic en el botón de descarga y guarda el archivo RumiArtIA.apk'
+                                    },
+                                    {
+                                        step: '2',
+                                        icon: '⚙️',
+                                        title: 'Habilitar Instalación',
+                                        description: 'Ve a Configuración > Seguridad > Habilita "Fuentes desconocidas" o "Instalar apps desconocidas"'
+                                    },
+                                    {
+                                        step: '3',
+                                        icon: '📁',
+                                        title: 'Localizar APK',
+                                        description: 'Abre "Archivos" o "Descargas" y busca el archivo RumiArtIA.apk'
+                                    },
+                                    {
+                                        step: '4',
+                                        icon: '📲',
+                                        title: 'Instalar App',
+                                        description: 'Toca el archivo APK, luego presiona "Instalar" y espera a que termine'
+                                    },
+                                    {
+                                        step: '5',
+                                        icon: '✅',
+                                        title: 'Dar Permisos',
+                                        description: 'Permite acceso a la Cámara y Almacenamiento cuando la app lo solicite'
+                                    },
+                                    {
+                                        step: '6',
+                                        icon: '🎉',
+                                        title: '¡Listo!',
+                                        description: 'Abre RumiArt IA, selecciona la sala y comienza a explorar'
+                                    }
+                                ].map((item) => (
+                                    <div key={item.step} style={{
+                                        background: 'rgba(255, 255, 255, 0.05)',
+                                        borderRadius: '20px',
+                                        padding: '2rem',
+                                        border: '2px solid rgba(0, 217, 255, 0.3)',
+                                        textAlign: 'center',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-5px)';
+                                        e.currentTarget.style.borderColor = '#00D9FF';
+                                        e.currentTarget.style.boxShadow = '0 10px 30px rgba(0, 217, 255, 0.3)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.3)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }}>
+                                        <div style={{
+                                            width: '80px',
+                                            height: '80px',
+                                            margin: '0 auto 1rem',
+                                            background: 'linear-gradient(135deg, #00D9FF 0%, #0099CC 100%)',
+                                            borderRadius: '50%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: '2rem',
+                                            fontWeight: 'bold',
+                                            color: '#1a0b2e',
+                                            boxShadow: '0 5px 20px rgba(0, 217, 255, 0.4)'
+                                        }}>
+                                            {item.step}
+                                        </div>
+                                        <div style={{
+                                            fontSize: '3rem',
+                                            marginBottom: '1rem'
+                                        }}>
+                                            {item.icon}
+                                        </div>
+                                        <h3 style={{
+                                            fontSize: '1.3rem',
+                                            color: '#00D9FF',
+                                            marginBottom: '0.8rem',
+                                            fontWeight: 'bold'
+                                        }}>
+                                            {item.title}
+                                        </h3>
+                                        <p style={{
+                                            fontSize: '0.95rem',
+                                            color: 'rgba(255, 255, 255, 0.8)',
+                                            lineHeight: '1.5'
+                                        }}>
+                                            {item.description}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Detalles adicionales */}
+                            <div style={{
+                                background: 'rgba(0, 217, 255, 0.1)',
+                                borderRadius: '20px',
+                                padding: '2rem',
+                                border: '2px solid rgba(0, 217, 255, 0.3)',
+                                marginBottom: '2rem'
+                            }}>
+                                <h3 style={{
+                                    fontSize: '1.5rem',
+                                    color: '#00D9FF',
+                                    marginBottom: '1.5rem',
+                                    textAlign: 'center'
+                                }}>
+                                    💡 Detalles Importantes
+                                </h3>
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                                    gap: '1.5rem'
+                                }}>
+                                    {[
+                                        {
+                                            icon: '🤖',
+                                            title: 'Android 7.0+',
+                                            text: 'Requiere Android 7.0 (Nougat) o superior'
+                                        },
+                                        {
+                                            icon: '📷',
+                                            title: 'Permisos',
+                                            text: 'Cámara y almacenamiento son necesarios'
+                                        },
+                                        {
+                                            icon: '💾',
+                                            title: '50 MB',
+                                            text: 'Asegúrate de tener espacio suficiente'
+                                        },
+                                        {
+                                            icon: '🌐',
+                                            title: 'Sin Internet',
+                                            text: 'Funciona completamente offline'
+                                        }
+                                    ].map((detail, idx) => (
+                                        <div key={idx} style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '1rem',
+                                            padding: '1rem',
+                                            background: 'rgba(255, 255, 255, 0.03)',
+                                            borderRadius: '10px'
+                                        }}>
+                                            <div style={{ fontSize: '2rem' }}>{detail.icon}</div>
+                                            <div>
+                                                <p style={{
+                                                    fontWeight: 'bold',
+                                                    color: '#00D9FF',
+                                                    marginBottom: '0.2rem'
+                                                }}>
+                                                    {detail.title}
+                                                </p>
+                                                <p style={{
+                                                    fontSize: '0.85rem',
+                                                    color: 'rgba(255, 255, 255, 0.7)'
+                                                }}>
+                                                    {detail.text}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Advertencia de seguridad */}
+                            <div style={{
+                                padding: '2rem',
+                                background: 'rgba(255, 140, 66, 0.1)',
+                                borderRadius: '15px',
+                                border: '2px solid rgba(255, 140, 66, 0.3)',
+                                textAlign: 'center'
+                            }}>
+                                <p style={{
+                                    fontSize: '1.1rem',
+                                    color: '#FF8C42',
+                                    fontWeight: 'bold',
+                                    marginBottom: '0.5rem'
+                                }}>
+                                    🔒 Nota de Seguridad
+                                </p>
+                                <p style={{
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    fontSize: '0.95rem'
+                                }}>
+                                    RumiArt IA es desarrollada por ISTER para el Museo y Centro Cultural Rumiñahui. 
+                                    Descarga solo desde este sitio oficial. Después de instalar, 
+                                    puedes desactivar "Fuentes desconocidas" por seguridad.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                    {/* Formulario de Encuesta */}
+                    <section id="encuesta" style={{
+                        minHeight: '100vh',
+                        padding: '6rem 2rem',
+                        background: 'rgba(0, 0, 0, 0.2)'
+                    }}>
+                        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+                            <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                                <h2 style={{
+                                    fontSize: '3rem',
+                                    fontWeight: 'bold',
+                                    marginBottom: '1rem',
+                                    background: 'linear-gradient(135deg, #FF8C42 0%, #FF6B9D 100%)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent'
+                                }}>
+                                    📝 Encuesta de Satisfacción
+                                </h2>
+                                <p style={{ fontSize: '1.2rem', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '1rem' }}>
+                                    Tu opinión es muy importante para nosotros
+                                </p>
+                                <p style={{ fontSize: '1rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+                                    Ayúdanos a mejorar RumiArt IA compartiendo tu experiencia
+                                </p>
+                            </div>
+
+                            {/* Motivación para llenar la encuesta */}
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                                gap: '1.5rem',
+                                marginBottom: '3rem'
+                            }}>
+                                {[
+                                    { icon: '💡', text: 'Mejora la app', color: '#00D9FF' },
+                                    { icon: '🎯', text: 'Nuevas funciones', color: '#FF8C42' },
+                                    { icon: '🐛', text: 'Corrige errores', color: '#FF6B9D' },
+                                    { icon: '⭐', text: 'Tu voz cuenta', color: '#00D9FF' }
+                                ].map((item, idx) => (
+                                    <div key={idx} style={{
+                                        background: `${item.color}15`,
+                                        padding: '1.5rem',
+                                        borderRadius: '15px',
+                                        border: `2px solid ${item.color}40`,
+                                        textAlign: 'center',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-5px)';
+                                        e.currentTarget.style.borderColor = item.color;
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.borderColor = `${item.color}40`;
+                                    }}>
+                                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
+                                            {item.icon}
+                                        </div>
+                                        <p style={{ fontSize: '0.95rem', fontWeight: 'bold', color: item.color }}>
+                                            {item.text}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            
+                            {/* Botón para acceder a la encuesta */}
+                            <div style={{
+                                background: 'linear-gradient(135deg, rgba(255, 140, 66, 0.2) 0%, rgba(255, 107, 157, 0.2) 100%)',
+                                borderRadius: '20px',
+                                padding: '3rem',
+                                border: '2px solid rgba(255, 140, 66, 0.4)',
+                                textAlign: 'center'
+                            }}>
+                                <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎯</div>
+                                <h3 style={{
+                                    fontSize: '1.8rem',
+                                    color: '#FF8C42',
+                                    marginBottom: '1rem'
+                                }}>
+                                    ¡Completa la Encuesta!
+                                </h3>
+                                <p style={{
+                                    fontSize: '1rem',
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    marginBottom: '2rem',
+                                    maxWidth: '600px',
+                                    margin: '0 auto 2rem'
+                                }}>
+                                    Solo te tomará 2-3 minutos. Tu feedback nos ayuda a crear 
+                                    una mejor experiencia para todos los visitantes del museo.
+                                </p>
+                                
+                                <button
+                                    onClick={() => {
+                                        // Aquí coloca el link de tu Google Form
+                                        const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdSrzcVEvhByXP8e0Yy0sK-96bRPdEZVyrar8f77csuZ8ly3Q/viewform?usp=header';
+                                        window.open(formUrl, '_blank');
+                                    }}
+                                    style={{
+                                        background: 'linear-gradient(135deg, #FF8C42 0%, #FF6B9D 100%)',
+                                        color: '#1a0b2e',
+                                        padding: '1.2rem 3rem',
+                                        borderRadius: '50px',
+                                        border: 'none',
+                                        fontSize: '1.3rem',
+                                        fontWeight: 'bold',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 10px 30px rgba(255, 140, 66, 0.4)',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.transform = 'translateY(-3px)';
+                                        e.target.style.boxShadow = '0 15px 40px rgba(255, 140, 66, 0.6)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.transform = 'translateY(0)';
+                                        e.target.style.boxShadow = '0 10px 30px rgba(255, 140, 66, 0.4)';
+                                    }}
+                                >
+                                    📝 Ir a la Encuesta
+                                </button>
+                                
+                                <p style={{
+                                    fontSize: '0.85rem',
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                    marginTop: '1.5rem'
+                                }}>
+                                    Se abrirá en una nueva pestaña
+                                </p>
+                            </div>
+
+                            {/* Agradecimiento */}
+                            <div style={{
+                                marginTop: '3rem',
+                                textAlign: 'center',
+                                padding: '2rem',
+                                background: 'rgba(0, 217, 255, 0.1)',
+                                borderRadius: '15px',
+                                border: '2px solid rgba(0, 217, 255, 0.3)'
+                            }}>
+                                <p style={{
+                                    fontSize: '1.2rem',
+                                    color: '#00D9FF',
+                                    fontWeight: 'bold',
+                                    marginBottom: '0.5rem'
+                                }}>
+                                    🙏 ¡Gracias por tu tiempo!
+                                </p>
+                                <p style={{
+                                    fontSize: '0.95rem',
+                                    color: 'rgba(255, 255, 255, 0.7)'
+                                }}>
+                                    Tu opinión nos ayuda a seguir mejorando la experiencia en el Museo y Centro Cultural Rumiñahui
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Footer */}
+                    <footer style={{
+                        padding: '3rem 2rem',
+                        background: '#1a0b2e',
+                        borderTop: '2px solid rgba(0, 217, 255, 0.3)',
+                        textAlign: 'center'
+                    }}>
+                        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                            <img 
+                                src="images/logoRumiArtIA.png" 
+                                alt="RumiArt IA Logo"
+                                style={{
+                                    width: '80px',
+                                    height: '80px',
+                                    marginBottom: '1rem',
+                                    borderRadius: '50%'
+                                }}
+                            />
+                            <h3 style={{
+                                fontSize: '2rem',
+                                background: 'linear-gradient(135deg, #00D9FF 0%, #FF8C42 100%)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                marginBottom: '1rem'
+                            }}>
+                                RumiArt IA
+                            </h3>
+                            <p style={{
+                                fontSize: '1rem',
+                                color: 'rgba(255, 255, 255, 0.6)',
+                                marginBottom: '1.5rem'
+                            }}>
+                                Reconocimiento de Objetos con Inteligencia Artificial
+                            </p>
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                gap: '2rem',
+                                flexWrap: 'wrap',
+                                marginBottom: '2rem'
+                            }}>
+                                <p style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.9rem' }}>
+                                    🏛️ Museo y Centro Cultural Rumiñahui
+                                </p>
+                                <p style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.9rem' }}>
+                                    🎓 ISTER - Instituto Tecnológico Rumiñahui
+                                </p>
+                            </div>
+                            <p style={{
+                                fontSize: '0.85rem',
+                                color: 'rgba(255, 255, 255, 0.4)'
+                            }}>
+                                © 2025 RumiArt IA. Desarrollado con ❤️ para el patrimonio cultural ecuatoriano | PDMN.
+                            </p>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
