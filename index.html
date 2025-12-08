@@ -37,6 +37,81 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Media Queries para Móviles */
+        @media (max-width: 768px) {
+            /* Ocultar menú desktop en móvil */
+            nav > div:last-child {
+                display: none !important;
+            }
+            
+            /* Ajustar padding general */
+            section {
+                padding: 3rem 1rem !important;
+            }
+            
+            /* Títulos más pequeños */
+            h1 {
+                font-size: 2.5rem !important;
+            }
+            
+            h2 {
+                font-size: 2rem !important;
+            }
+            
+            h3 {
+                font-size: 1.3rem !important;
+            }
+            
+            /* Textos más legibles */
+            p {
+                font-size: 0.95rem !important;
+            }
+            
+            /* Botones más accesibles */
+            button {
+                font-size: 1.1rem !important;
+                padding: 1rem 2rem !important;
+            }
+            
+            /* Grids a una columna */
+            [style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
+            
+            /* Logos más pequeños */
+            img[alt="RumiArt IA Logo"] {
+                width: 40px !important;
+                height: 40px !important;
+            }
+            
+            /* Logo hero más pequeño */
+            section:first-of-type img[alt="RumiArt IA Logo"] {
+                width: 120px !important;
+                height: 120px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Ajustes para pantallas muy pequeñas */
+            h1 {
+                font-size: 2rem !important;
+            }
+            
+            h2 {
+                font-size: 1.5rem !important;
+            }
+            
+            section {
+                padding: 2rem 1rem !important;
+            }
+            
+            /* Logo hero aún más pequeño */
+            section:first-of-type img[alt="RumiArt IA Logo"] {
+                width: 100px !important;
+                height: 100px !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -200,6 +275,7 @@
         // Componente de Navegación
         const Navigation = () => {
             const [scrolled, setScrolled] = useState(false);
+            const [menuOpen, setMenuOpen] = useState(false);
 
             useEffect(() => {
                 const handleScroll = () => {
@@ -213,8 +289,17 @@
                 const element = document.getElementById(sectionId);
                 if (element) {
                     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    setMenuOpen(false);
                 }
             };
+
+            const menuItems = [
+                { id: 'inicio', label: 'Inicio' },
+                { id: 'descargar', label: 'Descargar' },
+                { id: 'salas', label: 'Salas' },
+                { id: 'instalacion', label: 'Instalación' },
+                { id: 'encuesta', label: 'Encuesta' }
+            ];
 
             return (
                 <nav style={{
@@ -224,7 +309,7 @@
                     right: 0,
                     background: scrolled ? 'rgba(26, 11, 46, 0.95)' : 'transparent',
                     backdropFilter: scrolled ? 'blur(10px)' : 'none',
-                    padding: '1rem 2rem',
+                    padding: '1rem',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
@@ -235,20 +320,20 @@
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '1rem',
+                        gap: '0.5rem',
                         cursor: 'pointer'
                     }} onClick={() => scrollToSection('inicio')}>
                         <img 
                             src="images/logoRumiArtIA.png" 
                             alt="RumiArt IA Logo"
                             style={{
-                                width: '50px',
-                                height: '50px',
+                                width: '40px',
+                                height: '40px',
                                 borderRadius: '50%'
                             }}
                         />
                         <span style={{
-                            fontSize: '1.5rem',
+                            fontSize: '1.2rem',
                             fontWeight: 'bold',
                             background: 'linear-gradient(135deg, #00D9FF 0%, #FF8C42 100%)',
                             WebkitBackgroundClip: 'text',
@@ -258,37 +343,67 @@
                         </span>
                     </div>
                     
-                    <div style={{
-                        display: 'flex',
-                        gap: '2rem',
-                        alignItems: 'center'
-                    }}>
-                        {[
-                            { id: 'inicio', label: 'Inicio' },
-                            { id: 'descargar', label: 'Descargar' },
-                            { id: 'salas', label: 'Salas' },
-                            { id: 'instalacion', label: 'Instalación' },
-                            { id: 'encuesta', label: 'Encuesta' }
-                        ].map(item => (
-                            <button
-                                key={item.id}
-                                onClick={() => scrollToSection(item.id)}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    color: '#ffffff',
-                                    fontSize: '1rem',
-                                    cursor: 'pointer',
-                                    transition: 'color 0.3s ease',
-                                    fontFamily: 'inherit'
-                                }}
-                                onMouseEnter={(e) => e.target.style.color = '#00D9FF'}
-                                onMouseLeave={(e) => e.target.style.color = '#ffffff'}
-                            >
-                                {item.label}
-                            </button>
-                        ))}
-                    </div>
+                    {/* Botón hamburguesa para móvil */}
+                    <button
+                        onClick={() => setMenuOpen(!menuOpen)}
+                        style={{
+                            display: 'block',
+                            background: 'none',
+                            border: 'none',
+                            color: '#00D9FF',
+                            fontSize: '1.8rem',
+                            cursor: 'pointer',
+                            padding: '0.5rem'
+                        }}
+                    >
+                        {menuOpen ? '✕' : '☰'}
+                    </button>
+                    
+                    {/* Menú móvil */}
+                    {menuOpen && (
+                        <div style={{
+                            position: 'fixed',
+                            top: '70px',
+                            left: 0,
+                            right: 0,
+                            background: 'rgba(26, 11, 46, 0.98)',
+                            backdropFilter: 'blur(10px)',
+                            padding: '1rem',
+                            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
+                            zIndex: 999
+                        }}>
+                            {menuItems.map(item => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => scrollToSection(item.id)}
+                                    style={{
+                                        width: '100%',
+                                        background: 'rgba(0, 217, 255, 0.1)',
+                                        border: '1px solid rgba(0, 217, 255, 0.3)',
+                                        color: '#ffffff',
+                                        fontSize: '1.1rem',
+                                        padding: '1rem',
+                                        marginBottom: '0.5rem',
+                                        borderRadius: '10px',
+                                        cursor: 'pointer',
+                                        fontFamily: 'inherit',
+                                        textAlign: 'left',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.background = 'rgba(0, 217, 255, 0.2)';
+                                        e.target.style.borderColor = '#00D9FF';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.background = 'rgba(0, 217, 255, 0.1)';
+                                        e.target.style.borderColor = 'rgba(0, 217, 255, 0.3)';
+                                    }}
+                                >
+                                    {item.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </nav>
             );
         };
@@ -1066,6 +1181,7 @@
                             </div>
 
                             
+
                             {/* Botón para acceder a la encuesta */}
                             <div style={{
                                 background: 'linear-gradient(135deg, rgba(255, 140, 66, 0.2) 0%, rgba(255, 107, 157, 0.2) 100%)',
@@ -1096,7 +1212,7 @@
                                 <button
                                     onClick={() => {
                                         // Aquí coloca el link de tu Google Form
-                                        const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdSrzcVEvhByXP8e0Yy0sK-96bRPdEZVyrar8f77csuZ8ly3Q/viewform?usp=header';
+                                        const formUrl = 'https://forms.gle/BKByh9nLevhKYwVH7';
                                         window.open(formUrl, '_blank');
                                     }}
                                     style={{
@@ -1211,7 +1327,7 @@
                                 fontSize: '0.85rem',
                                 color: 'rgba(255, 255, 255, 0.4)'
                             }}>
-                                © 2025 RumiArt IA. Desarrollado con ❤️ para el patrimonio cultural ecuatoriano | PDMN.
+                                © 2025 RumiArt IA. Desarrollado con ❤️ para el patrimonio cultural ecuatoriano | PDMN
                             </p>
                         </div>
                     </footer>
